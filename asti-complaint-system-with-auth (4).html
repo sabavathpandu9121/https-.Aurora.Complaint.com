@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTI - Complaint Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-logo {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.08;
+            width: 600px;
+            height: auto;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-name {
+            color: #ff6b81;
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background: rgba(255, 107, 129, 0.2);
+            color: #ff6b81;
+            border: 1px solid #ff6b81;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #ff6b81;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .logo-header {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            color: #b8b8d1;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            color: #9191b8;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        /* Auth Forms */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 200px);
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .auth-card h2 {
+            color: #ff6b81;
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .auth-card p {
+            color: #b8b8d1;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .auth-toggle a {
+            color: #ff6b81;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .auth-toggle a:hover {
+            color: #ff8fa3;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(255, 107, 129, 0.3);
+        }
+
+        .card h2 {
+            color: #ff6b81;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 1.2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #b8b8d1;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #ff6b81;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(255, 107, 129, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff6b81 0%, #ff8fa3 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 129, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .status-card {
+            background: rgba(107, 91, 149, 0.1);
+        }
+
+        .status-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ff6b81;
+        }
+
+        .status-item h3 {
+            color: #ff6b81;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .status-item p {
+            color: #b8b8d1;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .status-resolved {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .status-inprogress {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .info-section h3 {
+            color: #ff6b81;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .info-section ul {
+            list-style: none;
+            color: #b8b8d1;
+        }
+
+        .info-section li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-section li:last-child {
+            border-bottom: none;
+        }
+
+        .info-section li:before {
+            content: "▸ ";
+            color: #ff6b81;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        footer {
+            text-align: center;
+            color: #9191b8;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .subtitle {
+                font-size: 1em;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .background-logo {
+                width: 400px;
+            }
+
+            .user-info {
+                position: static;
+                justify-content: center;
+                margin-bottom: 15px;
+            }
+
+            .auth-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Logo -->
+    <svg class="background-logo" viewBox="0 0 768 690" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="384,50 584,250 184,250" fill="#ff6b81" opacity="0.8"/>
+        <text x="384" y="340" font-family="Arial, sans-serif" font-size="120" fill="#6b5b95" text-anchor="middle">aurora</text>
+        <polygon points="184,420 284,620 84,620" fill="#b8b5d1" opacity="0.8"/>
+        <polygon points="584,420 484,620 684,620" fill="#b8b5d1" opacity="0.8"/>
+        <text x="384" y="520" font-family="Arial, sans-serif" font-size="40" fill="#6b5b95" text-anchor="middle">TEMPLE</text>
+        <text x="384" y="565" font-family="Arial, sans-serif" font-size="40" fill="#6b5b95" text-anchor="middle">OF</text>
+        <text x="384" y="610" font-family="Arial, sans-serif" font-size="40" fill="#6b5b95" text-anchor="middle">LEARNING</text>
+    </svg>
+    
+    <div class="container">
+        <header>
+            <div class="user-info hidden" id="userInfo">
+                <span class="user-name">Welcome, <span id="displayUserName"></span>!</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+            <svg class="logo-header" viewBox="0 0 768 690" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="384,50 584,250 184,250" fill="#ff6b81"/>
+                <text x="384" y="340" font-family="Arial, sans-serif" font-size="120" fill="#6b5b95" text-anchor="middle">aurora</text>
+                <polygon points="184,420 284,620 84,620" fill="#b8b5d1"/>
+                <polygon points="584,420 484,620 684,620" fill="#b8b5d1"/>
+                <text x="384" y="520" font-family="Arial, sans-serif" font-size="40" fill="#6b5b95" text-anchor="middle">TEMPLE</text>
+                <text x="384" y="565" font-family="Arial, sans-serif" font-size="40" fill="#6b5b95" text-anchor="middle">OF</text>
+                <text x="384" y="610" font-family="Arial, sans-serif" font-size="40" fill="#6b5b95" text-anchor="middle">LEARNING</text>
+            </svg>
+            <h1>Aurora's Scientific and Technological Institute</h1>
+            <p class="subtitle">Complaint Management System</p>
+            <p class="tagline">Temple of Learning</p>
+        </header>
+
+        <!-- Login Form -->
+        <div id="loginSection" class="auth-container">
+            <div class="auth-card">
+                <h2>🔐 Login</h2>
+                <p>Sign in to access the complaint system</p>
+                <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); color: #ffc107; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em;">
+                    <strong>⚠️ First Time User?</strong><br>
+                    You must <strong>register</strong> before you can login!
+                </div>
+                <div class="error-message" id="loginError"></div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginUsername">Username *</label>
+                        <input type="text" id="loginUsername" required placeholder="Enter your username">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password *</label>
+                        <input type="password" id="loginPassword" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div class="auth-toggle">
+                    <p style="color: #b8b8d1;">Don't have an account? <a onclick="showRegister()">Register here</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="registerSection" class="auth-container hidden">
+            <div class="auth-card">
+                <h2>📝 Register</h2>
+                <p>Create your account to file complaints</p>
+                <div style="background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.3); color: #4caf50; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em;">
+                    <strong>✓ New User?</strong><br>
+                    Register here to create your account. After registration, you can login and file complaints.
+                </div>
+                <div class="success-message" id="registerSuccess"></div>
+                <div class="error-message" id="registerError"></div>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="regUsername">Username *</label>
+                        <input type="text" id="regUsername" required placeholder="Choose a username" minlength="4">
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">Email Address *</label>
+                        <input type="email" id="regEmail" required placeholder="your.email@asti.edu.in">
+                    </div>
+                    <div class="form-group">
+                        <label for="regPhone">Phone Number *</label>
+                        <input type="tel" id="regPhone" required placeholder="+91 XXXXX XXXXX" pattern="[0-9+\s-]+">
+                    </div>
+                    <div class="form-group">
+                        <label for="regFullName">Full Name *</label>
+                        <input type="text" id="regFullName" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword">Password *</label>
+                        <input type="password" id="regPassword" required placeholder="Choose a strong password" minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="regConfirmPassword">Confirm Password *</label>
+                        <input type="password" id="regConfirmPassword" required placeholder="Re-enter your password">
+                    </div>
+                    <button type="submit">Register</button>
+                </form>
+                <div class="auth-toggle">
+                    <p style="color: #b8b8d1;">Already have an account? <a onclick="showLogin()">Login here</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard (Hidden until login) -->
+        <div id="dashboardSection" class="hidden">
+            <div class="info-section">
+                <h3>📋 How to File a Complaint</h3>
+                <ul>
+                    <li>Fill out the complaint form with accurate details</li>
+                    <li>Select the appropriate complaint category</li>
+                    <li>Provide a clear description of your issue</li>
+                    <li>Track your complaint status using your ticket ID</li>
+                    <li>Expect a response within 3-5 working days</li>
+                </ul>
+            </div>
+
+            <div class="main-content">
+                <div class="card">
+                    <h2><span class="card-icon">📝</span> Submit New Complaint</h2>
+                    <div class="success-message" id="complaintSuccess"></div>
+                    <form id="complaintForm">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required placeholder="your.email@asti.edu.in" value="info@asti.edu.in">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="rollNo">Roll Number / Employee ID *</label>
+                            <input type="text" id="rollNo" name="rollNo" required placeholder="Enter your ID">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="department">Department *</label>
+                            <select id="department" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="cse">Computer Science & Engineering</option>
+                                <option value="ece">Electronics & Communication Engineering</option>
+                                <option value="eee">Electrical & Electronics Engineering</option>
+                                <option value="mech">Mechanical Engineering</option>
+                                <option value="civil">Civil Engineering</option>
+                                <option value="admin">Administration</option>
+                                <option value="library">Library</option>
+                                <option value="hostel">Hostel</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Complaint Category *</label>
+                            <select id="category" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="academic">Academic Issues</option>
+                                <option value="infrastructure">Infrastructure & Facilities</option>
+                                <option value="library">Library Services</option>
+                                <option value="hostel">Hostel & Accommodation</option>
+                                <option value="transport">Transportation</option>
+                                <option value="canteen">Canteen & Food Services</option>
+                                <option value="harassment">Harassment/Ragging</option>
+                                <option value="admin">Administrative Issues</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="complaint">Complaint Description *</label>
+                            <textarea id="complaint" name="complaint" required placeholder="Describe your complaint in detail..."></textarea>
+                        </div>
+
+                        <button type="submit">Submit Complaint</button>
+                    </form>
+                </div>
+
+                <div class="card status-card">
+                    <h2><span class="card-icon">🔍</span> Track Complaint Status</h2>
+                    <form id="trackForm">
+                        <div class="form-group">
+                            <label for="ticketNumber">Ticket ID</label>
+                            <input type="text" id="ticketNumber" name="ticketNumber" placeholder="Enter your ticket ID">
+                        </div>
+                        <button type="submit">Track Status</button>
+                    </form>
+
+                    <div style="margin-top: 30px;">
+                        <h3 style="color: #b8b8d1; margin-bottom: 15px;">Your Recent Complaints</h3>
+                        
+                        <div id="userComplaints">
+                            <p style="color: #b8b8d1; text-align: center; padding: 20px;">No complaints filed yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>📞 Contact Information</h3>
+                <ul>
+                    <li><strong>Email:</strong> info@asti.edu.in</li>
+                    <li><strong>Phone:</strong> +91 (040) 1234-5678</li>
+                    <li><strong>Office Hours:</strong> Monday - Friday, 9:00 AM - 5:00 PM</li>
+                    <li><strong>Emergency Contact:</strong> +91 9876543210 (24/7)</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Aurora's Scientific and Technological Institute (ASTI). All rights reserved.</p>
+            <p>Temple of Learning - Empowering minds, Building futures</p>
+        </footer>
+    </div>
+
+    <script>
+        // Check if user is logged in on page load
+        window.onload = function() {
+            checkLoginStatus();
+            displayRegistrationInfo();
+        };
+
+        // Display info about registered users count
+        function displayRegistrationInfo() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            console.log('Total registered users:', users.length);
+            
+            if (users.length === 0) {
+                console.log('⚠️ No users registered yet. Please register to continue.');
+            } else {
+                console.log('✓ Registered users:', users.map(u => u.username).join(', '));
+            }
+        }
+
+        function checkLoginStatus() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                showDashboard(user);
+            }
+        }
+
+        // Show/Hide forms
+        function showRegister() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('registerSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        function showDashboard(user) {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.getElementById('displayUserName').textContent = user.fullName;
+            
+            // Pre-fill user data
+            document.getElementById('name').value = user.fullName;
+            document.getElementById('email').value = 'info@asti.edu.in';
+            
+            // Load user complaints
+            loadUserComplaints(user.username);
+        }
+
+        // Error and Success Messages
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Register Form Handler
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('regFullName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            
+            // Clear previous messages
+            document.getElementById('registerError').style.display = 'none';
+            document.getElementById('registerSuccess').style.display = 'none';
+            
+            // Validation
+            if (!fullName || !email || !phone || !username || !password) {
+                showError('registerError', '❌ All fields are required!');
+                return;
+            }
+            
+            if (username.length < 4) {
+                showError('registerError', '❌ Username must be at least 4 characters long!');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('registerError', '❌ Password must be at least 6 characters long!');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('registerError', '❌ Passwords do not match!');
+                return;
+            }
+            
+            // Check if username already exists
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+                showError('registerError', '❌ Username already exists! Please choose another.');
+                return;
+            }
+            
+            // Check if email already exists
+            if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+                showError('registerError', '❌ Email already registered!');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('registerError', '❌ Please enter a valid email address!');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                fullName: fullName,
+                email: email,
+                phone: phone,
+                username: username,
+                password: password,
+                registeredDate: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            console.log('✓ User registered successfully:', username);
+            console.log('Total users:', users.length);
+            
+            // Show success message
+            showSuccess('registerSuccess', '✓ Registration successful! Redirecting to login...');
+            
+            // Clear form
+            this.reset();
+            
+            // Switch to login after 2.5 seconds
+            setTimeout(() => {
+                showLogin();
+                // Pre-fill username in login form
+                document.getElementById('loginUsername').value = username;
+            }, 2500);
+        });
+
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            // Clear previous error
+            document.getElementById('loginError').style.display = 'none';
+            
+            if (!username || !password) {
+                showError('loginError', '❌ Please enter both username and password!');
+                return;
+            }
+            
+            // Get users from localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            console.log('Attempting login for:', username);
+            console.log('Total registered users:', users.length);
+            
+            // Check if username exists
+            const userExists = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+            
+            if (!userExists) {
+                // User not registered
+                showError('loginError', '❌ Account not found! Please register first.');
+                setTimeout(() => {
+                    if (confirm('You are not registered yet. Would you like to register now?')) {
+                        showRegister();
+                        document.getElementById('regUsername').value = username;
+                        document.getElementById('regUsername').focus();
+                    }
+                }, 1500);
+                return;
+            }
+            
+            // User exists, check password
+            if (userExists.password === password) {
+                console.log('✓ Login successful for:', userExists.username);
+                
+                // Save current user session
+                localStorage.setItem('currentUser', JSON.stringify(userExists));
+                
+                // Show dashboard
+                showDashboard(userExists);
+                
+                // Clear form
+                this.reset();
+            } else {
+                console.log('✗ Login failed - Incorrect password');
+                showError('loginError', '❌ Incorrect password! Please try again.');
+            }
+        });
+
+        // Logout Function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                location.reload();
+            }
+        }
+
+        // Complaint Form Handler
+        document.getElementById('complaintForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            // Generate ticket ID
+            const ticketId = 'CMP' + new Date().getFullYear() + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            
+            // Get form data
+            const complaint = {
+                ticketId,
+                username: currentUser.username,
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                rollNo: document.getElementById('rollNo').value,
+                department: document.getElementById('department').value,
+                category: document.getElementById('category').value,
+                description: document.getElementById('complaint').value,
+                status: 'Pending',
+                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                timestamp: new Date().toISOString()
+            };
+            
+            // Save complaint
+            const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+            complaints.push(complaint);
+            localStorage.setItem('complaints', JSON.stringify(complaints));
+            
+            // Show success message
+            showSuccess('complaintSuccess', '✓ Complaint submitted successfully! Your ticket ID: ' + ticketId);
+            
+            // Send email notification (simulated)
+            console.log('Email notification sent to: info@asti.edu.in');
+            console.log('Complaint Details:', complaint);
+            
+            // Clear form except pre-filled fields
+            document.getElementById('rollNo').value = '';
+            document.getElementById('department').value = '';
+            document.getElementById('category').value = '';
+            document.getElementById('complaint').value = '';
+            
+            // Reload user complaints
+            loadUserComplaints(currentUser.username);
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Load User Complaints
+        function loadUserComplaints(username) {
+            const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+            const userComplaints = complaints.filter(c => c.username === username);
+            
+            const complaintsDiv = document.getElementById('userComplaints');
+            
+            if (userComplaints.length === 0) {
+                complaintsDiv.innerHTML = '<p style="color: #b8b8d1; text-align: center; padding: 20px;">No complaints filed yet.</p>';
+                return;
+            }
+            
+            complaintsDiv.innerHTML = '';
+            
+            // Sort by date (newest first)
+            userComplaints.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            userComplaints.forEach(complaint => {
+                const statusClass = complaint.status === 'Resolved' ? 'status-resolved' : 
+                                   complaint.status === 'In Progress' ? 'status-inprogress' : 
+                                   'status-pending';
+                
+                const complaintHtml = `
+                    <div class="status-item">
+                        <h3>${complaint.description.substring(0, 50)}${complaint.description.length > 50 ? '...' : ''}</h3>
+                        <p><strong>Ticket:</strong> ${complaint.ticketId}</p>
+                        <p><strong>Department:</strong> ${complaint.department.toUpperCase()}</p>
+                        <p><strong>Category:</strong> ${complaint.category}</p>
+                        <p><strong>Date:</strong> ${complaint.date}</p>
+                        <span class="status-badge ${statusClass}">${complaint.status}</span>
+                    </div>
+                `;
+                
+                complaintsDiv.innerHTML += complaintHtml;
+            });
+        }
+
+        // Track Complaint Handler
+        document.getElementById('trackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const ticketNumber = document.getElementById('ticketNumber').value;
+            
+            if (!ticketNumber) {
+                alert('Please enter a ticket ID to track your complaint.');
+                return;
+            }
+            
+            const complaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+            const complaint = complaints.find(c => c.ticketId === ticketNumber);
+            
+            if (complaint) {
+                alert(`Ticket ID: ${complaint.ticketId}\nStatus: ${complaint.status}\nCategory: ${complaint.category}\nDepartment: ${complaint.department}\nDate: ${complaint.date}\n\nDescription: ${complaint.description}`);
+            } else {
+                alert('Complaint not found! Please check the ticket ID.');
+            }
+            
+            // Clear input
+            document.getElementById('ticketNumber').value = '';
+        });
+    </script>
+</body>
+</html>
